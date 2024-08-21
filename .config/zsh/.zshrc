@@ -1,3 +1,6 @@
+#Importing antigen
+source "$HOME/.oh-my-zsh/antigen.zsh"
+
 # If you come from bash you might have to change your $PATH.
 # export PATH=$HOME/bin:/usr/local/bin:$PATH
 
@@ -91,14 +94,43 @@ export LANG=en_US.UTF-8
 # Compilation flags
 export ARCHFLAGS="-arch x86_64"
 
+export EDITOR="nvim"
+
 # Set personal aliases, overriding those provided by oh-my-zsh libs,
 # plugins, and themes. Aliases can be placed here, though oh-my-zsh
 # users are encouraged to define aliases within the ZSH_CUSTOM folder.
 # For a full list of active aliases, run `alias`.
 #
 # Example aliases
-alias zshrc="vim ~/.zshrc"
-alias zload="source $HOME/.zshrc"
+alias zshrc="$EDITOR $ZDOTDIR/.zshrc"
+alias ohmyzsh="mate ~/.oh-my-zsh"
+alias zload="source $ZDOTDIR/.zshrc"
 
-export EDITOR="nvim"
 
+export SSH_DIR="$HOME/.ssh"
+
+
+
+
+# write a function that executes a git command while allowing to specify an ssh key path to use
+# the function needs to pass all of its arguments to the git command
+# the function should be named gsk
+
+gsk() {
+    # check if the first argument is a file
+    if [ -f "$1" ]; then
+        key_path="$SSH_DIR/$key_path"
+    elif [ -f "$SSH_DIR/$1" ]; then
+        key_path="$SSH_DIR/$1"
+    elif [ -f "$SSH_DIR/id_rsa_$1" ]; then
+        key_path="$SSH_DIR/id_rsa_$1"
+    else
+        echo "The specified key file does not exist"
+        return 1
+    fi
+
+    git_args="${@:2}"
+
+    echo "ssh-agent bash -c \"ssh-add $key_path; git $git_args\""
+    ssh-agent bash -c "ssh-add $key_path; git $git_args"
+}
